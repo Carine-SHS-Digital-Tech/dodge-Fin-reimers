@@ -22,12 +22,26 @@ class FallingObject(pygame.sprite.Sprite):
     def moveFallingObjects(self,distance):
         if self.rect.y <= 470:
             self.rect.y = self.rect.y + distance
+    def deleteFallingsObjects(self):
+        if self.rect.y > 470:
+            self.kill()
 pygame.init()               # Pygame is initialised (starts running)
 
 
+class Character(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([50,68])
+        self.image.set_colorkey(black)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = 310
+        self.rect.y = 420
+
+        self.image.blit(pygame.image.load("942-9428059_kawaii-fox-png.png")),(0,0))
 screen = pygame.display.set_mode([700,500]) # Set the width and height of the screen [width,height]
 pygame.display.set_caption("Dodge")
-background_image = pygame.image.load("OrchardBackground.jpg").convert()
+background_image = pygame.image.load("backroundcity.jpg").convert()
 done = False                                # Loop until the user clicks the close button.
 clock = pygame.time.Clock()                 # Used to manage how fast the screen updates
 black    = (   0,   0,   0)                 # Define some colors using rgb values.  These can be
@@ -36,6 +50,10 @@ white    = ( 255, 255, 255)                 # used throughout the game instead o
 
 # Define additional Functions and Procedures here
 allFallingObjects = pygame.sprite.Group()
+
+
+nextApple = pygame.time.get_ticks() + 2500
+
 # -------- Main Program Loop -----------
 while done == False:
 
@@ -45,21 +63,19 @@ while done == False:
 
 
 
-
-
-
     # Update sprites here
-    nextObject = FallingObject()
-    nextObject.setImage("Apple.png")
-
-    allFallingObjects.add(nextObject)
+    if pygame.time.get_ticks() > nextApple:
+        nextObject = FallingObject()
+        nextObject.setImage("Apple.png")
+        allFallingObjects.add(nextObject)
+        nextApple = pygame.time.get_ticks() + 1500
 
 
     for eachObject in (allFallingObjects.sprites()):
         eachObject.moveFallingObjects(5)
 
 
-
+        eachObject.deleteFallingsObjects()
     screen.blit(background_image,[0,0])
     allFallingObjects.draw(screen)
     pygame.display.flip()                   # Go ahead and update the screen with what we've drawn.
