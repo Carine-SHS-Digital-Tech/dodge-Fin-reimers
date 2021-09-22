@@ -94,7 +94,7 @@ while done == False:
         nextObject = FallingObject()
         nextObject.setImage("doughnute2.png")
         allFallingObjects.add(nextObject)
-        nextApple = pygame.time.get_ticks() + 1500
+        nextApple = pygame.time.get_ticks() + 700
 
 
     for eachObject in (allFallingObjects.sprites()):
