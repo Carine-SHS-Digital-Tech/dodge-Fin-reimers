@@ -22,9 +22,14 @@ class FallingObject(pygame.sprite.Sprite):
     def moveFallingObjects(self,distance):
         if self.rect.y <= 470:
             self.rect.y = self.rect.y + distance
-    def deleteFallingsObjects(self):
+
+    def deleteFallingObjects(self,oldscore):
         if self.rect.y > 470:
             self.kill()
+            newscore = oldscore + 1
+            return newscore
+        else:
+            return oldscore
 pygame.init()               # Pygame is initialised (starts running)
 
 
@@ -38,7 +43,16 @@ class Character(pygame.sprite.Sprite):
         self.rect.x = 310
         self.rect.y = 420
 
-        self.image.blit(pygame.image.load("942-9428059_kawaii-fox-png.png")),(0,0))
+        self.image.blit(pygame.image.load("kawaiifoxxy.png"),(0,0))
+
+    def moveCharacter(self,movement):
+        if self.rect.x >= 5 and self.rect.x <= 645:
+            self.rect.x = self.rect.x + movement
+        if self.rect.x<5:
+            self.rect.x = 5
+        if self.rect.x>645:
+            self.rect.x = 645
+
 screen = pygame.display.set_mode([700,500]) # Set the width and height of the screen [width,height]
 pygame.display.set_caption("Dodge")
 background_image = pygame.image.load("backroundcity.jpg").convert()
@@ -46,27 +60,39 @@ done = False                                # Loop until the user clicks the clo
 clock = pygame.time.Clock()                 # Used to manage how fast the screen updates
 black    = (   0,   0,   0)                 # Define some colors using rgb values.  These can be
 white    = ( 255, 255, 255)                 # used throughout the game instead of using rgb values.
-
+font = pygame.font.Font(None, 36)
 
 # Define additional Functions and Procedures here
 allFallingObjects = pygame.sprite.Group()
 
-
 nextApple = pygame.time.get_ticks() + 2500
 
+charactersGroup = pygame.sprite.Group()
+character = Character()
+charactersGroup.add(character)
+
+movement = 0
+
+score = 0
 # -------- Main Program Loop -----------
 while done == False:
 
     for event in pygame.event.get():        # Check for an event (mouse click, key press)
         if event.type == pygame.QUIT:       # If user clicked close window
             done = True                     # Flag that we are done so we exit this loop
-
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                movement = -5
+            if event.key == pygame.K_RIGHT:
+                movement = 5
+        if event.type == pygame.KEYUP:
+            movement = 0
 
 
     # Update sprites here
     if pygame.time.get_ticks() > nextApple:
         nextObject = FallingObject()
-        nextObject.setImage("Apple.png")
+        nextObject.setImage("doughnute2.png")
         allFallingObjects.add(nextObject)
         nextApple = pygame.time.get_ticks() + 1500
 
@@ -74,11 +100,19 @@ while done == False:
     for eachObject in (allFallingObjects.sprites()):
         eachObject.moveFallingObjects(5)
 
+        score = eachObject.deleteFallingObjects(score)
 
-        eachObject.deleteFallingsObjects()
+    character.moveCharacter(movement)
+
+    collisions = pygame.sprite.groupcollide(allFallingObjects,charactersGroup,False,False)
+    if len(collisions)>0:
+        done= True
     screen.blit(background_image,[0,0])
     allFallingObjects.draw(screen)
+    charactersGroup.draw(screen)
+    textImg = font.render(str(score),1,white)
+    screen.blit( textImg, (10,10) )
     pygame.display.flip()                   # Go ahead and update the screen with what we've drawn.
-    clock.tick(20)                          # Limit to 20 frames per seconds
+    clock.tick(40)                          # Limit to 20 frames per seconds
 
 pygame.quit()                               # Close the window and quit.
